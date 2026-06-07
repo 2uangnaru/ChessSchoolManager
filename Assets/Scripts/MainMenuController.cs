@@ -7,7 +7,7 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private GameObject openTournamentPanel;
     [SerializeField] private GameObject importTournamentPanel;
     [SerializeField] private GameObject guidePanel;
-
+    [SerializeField] private GameObject playerListPanel;
     private void Start()
     {
         ShowCreateTournament();
@@ -18,6 +18,10 @@ public class MainMenuController : MonoBehaviour
         ShowOnly(createTournamentPanel);
     }
 
+    public void ShowPlayerList()
+    {
+        ShowOnly(playerListPanel);
+    }
     public void ShowOpenTournament()
     {
         ShowOnly(openTournamentPanel);
@@ -39,5 +43,6 @@ public class MainMenuController : MonoBehaviour
         openTournamentPanel.SetActive(targetPanel == openTournamentPanel);
         importTournamentPanel.SetActive(targetPanel == importTournamentPanel);
         guidePanel.SetActive(targetPanel == guidePanel);
+        playerListPanel.SetActive(targetPanel == playerListPanel);
     }
 }

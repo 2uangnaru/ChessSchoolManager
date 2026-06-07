@@ -5,6 +5,7 @@ public class CreateTournamentController : MonoBehaviour
 {
     [SerializeField] private TMP_InputField tournamentNameInput;
     [SerializeField] private TMP_Dropdown roundDropdown;
+    [SerializeField] private MainMenuController mainMenuController;
 
     public void CreateTournament()
     {
@@ -25,6 +26,10 @@ public class CreateTournamentController : MonoBehaviour
             CurrentRound = 0
         };
 
+        TournamentManager.Instance.CurrentTournament = data;
+
         Debug.Log($"Đã tạo giải: {data.TournamentName} | Số ván: {data.TotalRounds}");
+
+        mainMenuController.ShowPlayerList();
     }
 }

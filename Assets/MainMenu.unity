@@ -314,7 +314,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 1.697876, y: -119.08377}
+  m_AnchoredPosition: {x: 1.6977539, y: -119.08374}
   m_SizeDelta: {x: -78.6527, y: -313.4905}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &49423945
@@ -3320,7 +3320,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &958297089
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4063,6 +4063,7 @@ MonoBehaviour:
   openTournamentPanel: {fileID: 2138274320}
   importTournamentPanel: {fileID: 1947643900}
   guidePanel: {fileID: 1454946022}
+  playerListPanel: {fileID: 1119601412}
 --- !u!1 &1225981494
 GameObject:
   m_ObjectHideFlags: 0
@@ -5245,6 +5246,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1405273122}
   m_CullTransparentMesh: 1
+--- !u!1 &1444084427
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1444084429}
+  - component: {fileID: 1444084428}
+  m_Layer: 0
+  m_Name: TournamentManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1444084428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1444084427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b47f42a2331442418f7c94ae9e15444, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CurrentTournament:
+    TournamentName: 
+    TotalRounds: 0
+    CurrentRound: 0
+    Players: []
+--- !u!4 &1444084429
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1444084427}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 875.8621, y: 593.7381, z: -8.525108}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1454946022
 GameObject:
   m_ObjectHideFlags: 0
@@ -5852,6 +5902,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tournamentNameInput: {fileID: 1920076728}
   roundDropdown: {fileID: 1369222218}
+  mainMenuController: {fileID: 1183180109}
 --- !u!1 &1661142208
 GameObject:
   m_ObjectHideFlags: 0
@@ -8167,3 +8218,4 @@ SceneRoots:
   - {fileID: 1302961948}
   - {fileID: 1152705476}
   - {fileID: 1814692598}
+  - {fileID: 1444084429}

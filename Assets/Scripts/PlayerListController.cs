@@ -4,28 +4,51 @@ using UnityEngine;
 
 public class PlayerListController : MonoBehaviour
 {
+    [Header("Inputs")]
     [SerializeField] private TMP_InputField nameInput;
     [SerializeField] private TMP_InputField classInput;
+
+    [Header("Table")]
     [SerializeField] private Transform studentRowsContent;
     [SerializeField] private StudentRowItem studentRowPrefab;
 
-    private readonly List<PlayerData> players = new();
     private int nextPlayerId = 1;
 
     public void AddPlayer()
     {
+        if (TournamentManager.Instance.CurrentTournament == null)
+        {
+            Debug.LogWarning("Chưa có giải đấu. Hãy tạo giải trước.");
+            return;
+        }
+
         string playerName = nameInput.text.Trim();
         string className = classInput.text.Trim();
 
-        if (string.IsNullOrEmpty(playerName) || string.IsNullOrEmpty(className))
+        if (string.IsNullOrEmpty(playerName))
+        {
+            Debug.LogWarning("Chưa nhập họ tên học sinh");
             return;
+        }
 
-        players.Add(new PlayerData
+        if (string.IsNullOrEmpty(className))
+        {
+            Debug.LogWarning("Chưa nhập lớp");
+            return;
+        }
+
+        PlayerData player = new PlayerData
         {
             Id = nextPlayerId++,
             Name = playerName,
-            ClassName = className
-        });
+            ClassName = className,
+            Score = 0,
+            WhiteCount = 0,
+            BlackCount = 0,
+            HadBye = false
+        };
+
+        TournamentManager.Instance.CurrentTournament.Players.Add(player);
 
         nameInput.text = "";
         classInput.text = "";
@@ -35,7 +58,7 @@ public class PlayerListController : MonoBehaviour
 
     private void DeletePlayer(PlayerData player)
     {
-        players.Remove(player);
+        TournamentManager.Instance.CurrentTournament.Players.Remove(player);
         RefreshTable();
     }
 
@@ -45,6 +68,8 @@ public class PlayerListController : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
+
+        List<PlayerData> players = TournamentManager.Instance.CurrentTournament.Players;
 
         for (int i = 0; i < players.Count; i++)
         {
