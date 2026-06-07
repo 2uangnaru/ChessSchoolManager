@@ -8,7 +8,7 @@ public class PairingController : MonoBehaviour
     [SerializeField] private TMP_Text roundTitleText;
     [SerializeField] private TMP_Text totalPlayersText;
     [SerializeField] private TMP_Text totalBoardsText;
-
+    [SerializeField] private UnityEngine.UI.Button generatePairingButton;
     [Header("Table")]
     [SerializeField] private Transform pairingRowsContent;
     [SerializeField] private PairingRowItem pairingRowPrefab;
@@ -32,18 +32,36 @@ public class PairingController : MonoBehaviour
         }
 
         int nextRound = tournament.CurrentRound + 1;
+        bool alreadyPaired = tournament.Rounds.Exists(
+        r => r.RoundNumber == nextRound);
+
+        generatePairingButton.interactable = !alreadyPaired;
         int totalPlayers = tournament.Players.Count;
         int totalBoards = totalPlayers / 2;
 
-        roundTitleText.text = $"BỐC THĂM VÁN {nextRound} / {tournament.TotalRounds}";
+        roundTitleText.text = $"BỐC THĂM VÁN: {nextRound} / {tournament.TotalRounds}";
         totalPlayersText.text = $"Tổng học sinh: {totalPlayers}";
         totalBoardsText.text = $"Số bàn: {totalBoards}";
     }
 
     public void GeneratePairing()
     {
+
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
 
+        int roundNumber = tournament.CurrentRound + 1;
+
+        RoundData existingRound =tournament.Rounds.Find(r =>
+        r.RoundNumber == roundNumber);
+
+        if (existingRound != null)
+        {
+            Debug.LogWarning(
+                $"Vòng {roundNumber} đã được bốc thăm."
+            );
+
+            return;
+        }
         if (tournament == null)
         {
             Debug.LogWarning("Chưa có giải đấu.");
@@ -55,8 +73,6 @@ public class PairingController : MonoBehaviour
             Debug.LogWarning("Cần ít nhất 2 học sinh để bốc thăm.");
             return;
         }
-
-        int roundNumber = tournament.CurrentRound + 1;
 
         if (roundNumber > tournament.TotalRounds)
         {
