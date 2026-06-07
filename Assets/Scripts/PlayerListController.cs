@@ -4,11 +4,8 @@ using UnityEngine;
 
 public class PlayerListController : MonoBehaviour
 {
-    [Header("Inputs")]
     [SerializeField] private TMP_InputField nameInput;
     [SerializeField] private TMP_InputField classInput;
-
-    [Header("Table")]
     [SerializeField] private Transform studentRowsContent;
     [SerializeField] private StudentRowItem studentRowPrefab;
 
@@ -20,33 +17,39 @@ public class PlayerListController : MonoBehaviour
         string playerName = nameInput.text.Trim();
         string className = classInput.text.Trim();
 
-        if (string.IsNullOrEmpty(playerName))
-        {
-            Debug.LogWarning("Chưa nhập họ tên học sinh");
+        if (string.IsNullOrEmpty(playerName) || string.IsNullOrEmpty(className))
             return;
-        }
 
-        if (string.IsNullOrEmpty(className))
-        {
-            Debug.LogWarning("Chưa nhập lớp");
-            return;
-        }
-
-        PlayerData player = new PlayerData
+        players.Add(new PlayerData
         {
             Id = nextPlayerId++,
             Name = playerName,
             ClassName = className
-        };
-
-        players.Add(player);
-
-        StudentRowItem row = Instantiate(studentRowPrefab, studentRowsContent);
-        row.Setup(player, players.Count);
+        });
 
         nameInput.text = "";
         classInput.text = "";
 
-        Debug.Log($"Đã thêm học sinh: {player.Name} - {player.ClassName}");
+        RefreshTable();
+    }
+
+    private void DeletePlayer(PlayerData player)
+    {
+        players.Remove(player);
+        RefreshTable();
+    }
+
+    private void RefreshTable()
+    {
+        foreach (Transform child in studentRowsContent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            StudentRowItem row = Instantiate(studentRowPrefab, studentRowsContent);
+            row.Setup(players[i], i + 1, DeletePlayer);
+        }
     }
 }
