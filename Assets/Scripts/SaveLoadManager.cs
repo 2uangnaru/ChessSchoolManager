@@ -135,7 +135,23 @@ public static class SaveLoadManager
 
     }
 
+    public static void DeleteTournament(string tournamentName)
+    {
+        string filePath = Path.Combine(
+            TournamentFolder,
+            $"{tournamentName}.json"
+        );
 
+        if (!File.Exists(filePath))
+        {
+            Debug.LogWarning($"Không tìm thấy file giải: {tournamentName}");
+            return;
+        }
+
+        File.Delete(filePath);
+
+        Debug.Log($"Đã xóa giải: {tournamentName}");
+    }
 
     public static bool HasSavedTournament()
     {

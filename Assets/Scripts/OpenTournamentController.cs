@@ -34,6 +34,22 @@ public class OpenTournamentController : MonoBehaviour
         }
     }
 
+    public void DeleteSelectedTournament()
+    {
+        if (string.IsNullOrEmpty(selectedTournament))
+        {
+            Debug.LogWarning("Chưa chọn giải nào để xóa.");
+            return;
+        }
+
+        SaveLoadManager.DeleteTournament(selectedTournament);
+
+        selectedTournament = null;
+        selectedRow = null;
+
+        RefreshList();
+    }
+
     public void OpenSelectedTournament()
     {
         if (string.IsNullOrEmpty(selectedTournament))
