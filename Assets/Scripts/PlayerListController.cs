@@ -54,12 +54,15 @@ public class PlayerListController : MonoBehaviour
         classInput.text = "";
 
         RefreshTable();
+
+        SaveLoadManager.SaveTournament(TournamentManager.Instance.CurrentTournament);
     }
 
     private void DeletePlayer(PlayerData player)
     {
         TournamentManager.Instance.CurrentTournament.Players.Remove(player);
         RefreshTable();
+        SaveLoadManager.SaveTournament(TournamentManager.Instance.CurrentTournament);
     }
 
     private void RefreshTable()
@@ -77,4 +80,10 @@ public class PlayerListController : MonoBehaviour
             row.Setup(players[i], i + 1, DeletePlayer);
         }
     }
+
+    public void RefreshFromCurrentTournament()
+    {
+        RefreshTable();
+    }
+
 }

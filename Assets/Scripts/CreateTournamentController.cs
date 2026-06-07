@@ -28,6 +28,8 @@ public class CreateTournamentController : MonoBehaviour
 
         TournamentManager.Instance.CurrentTournament = data;
 
+        SaveLoadManager.SaveTournament(data);
+
         Debug.Log($"Đã tạo giải: {data.TournamentName} | Số ván: {data.TotalRounds}");
 
         mainMenuController.ShowPlayerList();

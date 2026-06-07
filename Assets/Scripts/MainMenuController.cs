@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -8,6 +8,7 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private GameObject importTournamentPanel;
     [SerializeField] private GameObject guidePanel;
     [SerializeField] private GameObject playerListPanel;
+    [SerializeField] private PlayerListController playerListController;
     private void Start()
     {
         ShowCreateTournament();
@@ -45,4 +46,22 @@ public class MainMenuController : MonoBehaviour
         guidePanel.SetActive(targetPanel == guidePanel);
         playerListPanel.SetActive(targetPanel == playerListPanel);
     }
+
+    public void OpenSavedTournament()
+    {
+        TournamentData data = SaveLoadManager.LoadLatestTournament();
+
+        if (data == null)
+        {
+            Debug.LogWarning("Không tìm thấy giải đang làm dở.");
+            return;
+        }
+
+        TournamentManager.Instance.CurrentTournament = data;
+
+        ShowPlayerList();
+
+        playerListController.RefreshFromCurrentTournament();
+    }
+
 }
