@@ -12,4 +12,8 @@ public class TournamentData
     public int CurrentRound;
 
     public List<PlayerData> Players = new();
+
+    // chuẩn bị cho bước tiếp theo
+
+    public List<RoundData> Rounds = new();
 }
