@@ -63,6 +63,16 @@ public class PairingController : MonoBehaviour
 
         int nextRound = tournament.CurrentRound + 1;
 
+        if (tournament == null)
+        {
+            roundTitleText.text = "CHƯA CÓ GIẢI ĐẤU";
+            totalPlayersText.text = "Tổng học sinh: 0";
+            totalBoardsText.text = "Số bàn: 0";
+            generatePairingButton.interactable = false;
+            UpdatePaginationUI(0);
+            return;
+        }
+
         if (tournament.CurrentRound >= tournament.TotalRounds)
         {
             roundTitleText.text = "GIẢI ĐẤU ĐÃ KẾT THÚC";
@@ -87,28 +97,8 @@ public class PairingController : MonoBehaviour
 
     public void GeneratePairing()
     {
-
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
 
-        if (tournament.CurrentRound >= tournament.TotalRounds)
-        {
-            Debug.LogWarning("Giải đấu đã kết thúc, không thể bốc thăm thêm.");
-            return;
-        }
-
-        int roundNumber = tournament.CurrentRound + 1;
-
-        RoundData existingRound =tournament.Rounds.Find(r =>
-        r.RoundNumber == roundNumber);
-
-        if (existingRound != null)
-        {
-            Debug.LogWarning(
-                $"Vòng {roundNumber} đã được bốc thăm."
-            );
-
-            return;
-        }
         if (tournament == null)
         {
             Debug.LogWarning("Chưa có giải đấu.");
@@ -121,45 +111,23 @@ public class PairingController : MonoBehaviour
             return;
         }
 
-        if (roundNumber > tournament.TotalRounds)
+        if (tournament.CurrentRound >= tournament.TotalRounds)
         {
-            Debug.LogWarning("Giải đấu đã đủ số ván.");
+            Debug.LogWarning("Giải đấu đã kết thúc, không thể bốc thăm thêm.");
             return;
         }
 
-        List<PlayerData> shuffledPlayers = new List<PlayerData>(tournament.Players);
+        int roundNumber = tournament.CurrentRound + 1;
 
-        for (int i = 0; i < shuffledPlayers.Count; i++)
+        RoundData existingRound = tournament.Rounds.Find(r => r.RoundNumber == roundNumber);
+
+        if (existingRound != null)
         {
-            int randomIndex = Random.Range(i, shuffledPlayers.Count);
-            (shuffledPlayers[i], shuffledPlayers[randomIndex]) =
-                (shuffledPlayers[randomIndex], shuffledPlayers[i]);
+            Debug.LogWarning($"Vòng {roundNumber} đã được bốc thăm.");
+            return;
         }
 
-        RoundData round = new RoundData
-        {
-            RoundNumber = roundNumber,
-            IsFinished = false
-        };
-
-        int boardNumber = 1;
-
-        for (int i = 0; i < shuffledPlayers.Count - 1; i += 2)
-        {
-            PlayerData white = shuffledPlayers[i];
-            PlayerData black = shuffledPlayers[i + 1];
-
-            MatchData match = new MatchData
-            {
-                BoardNumber = boardNumber,
-                WhitePlayerId = white.Id,
-                BlackPlayerId = black.Id,
-                Result = MatchResult.NotPlayed
-            };
-
-            round.Matches.Add(match);
-            boardNumber++;
-        }
+        RoundData round = GenerateSwissRound(tournament, roundNumber);
 
         tournament.Rounds.Add(round);
 
@@ -212,18 +180,204 @@ public class PairingController : MonoBehaviour
 
             PairingRowItem row = Instantiate(pairingRowPrefab, pairingRowsContent);
 
-            row.Setup(
-                match.BoardNumber,
-                white != null ? white.Name : "Không tìm thấy",
-                black != null ? black.Name : "Không tìm thấy"
-            );
+            if (match.IsBye)
+            {
+                row.Setup(
+                    match.BoardNumber,
+                    white != null ? white.Name : "Không tìm thấy",
+                    "Miễn đấu"
+                );
+            }
+            else
+            {
+                row.Setup(
+                    match.BoardNumber,
+                    white != null ? white.Name : "Không tìm thấy",
+                    black != null ? black.Name : "Không tìm thấy"
+                );
+            }
         }
 
         UpdatePaginationUI(totalItems);
     }
 
 
+    private RoundData GenerateSwissRound(TournamentData tournament, int roundNumber)
+    {
+        List<PlayerData> players = new List<PlayerData>(tournament.Players);
 
+        players.Sort((a, b) =>
+        {
+            int scoreCompare = b.Score.CompareTo(a.Score);
+            if (scoreCompare != 0)
+                return scoreCompare;
+
+            return a.Id.CompareTo(b.Id);
+        });
+
+        RoundData round = new RoundData
+        {
+            RoundNumber = roundNumber,
+            IsFinished = false
+        };
+
+        int boardNumber = 1;
+
+        if (players.Count % 2 == 1)
+        {
+            PlayerData byePlayer = FindByePlayer(players);
+
+            if (byePlayer != null)
+            {
+                players.Remove(byePlayer);
+
+                round.Matches.Add(new MatchData
+                {
+                    BoardNumber = boardNumber,
+                    WhitePlayerId = byePlayer.Id,
+                    BlackPlayerId = -1,
+                    Result = MatchResult.Bye,
+                    IsBye = true
+                });
+
+                byePlayer.Score += 1f;
+                byePlayer.HadBye = true;
+
+                boardNumber++;
+            }
+        }
+
+        List<PlayerData> unpaired = new List<PlayerData>(players);
+
+        while (unpaired.Count >= 2)
+        {
+            PlayerData playerA = unpaired[0];
+            unpaired.RemoveAt(0);
+
+            PlayerData playerB = FindBestOpponent(playerA, unpaired);
+
+            if (playerB == null)
+            {
+                playerB = unpaired[0];
+            }
+
+            unpaired.Remove(playerB);
+
+            AssignColors(playerA, playerB, out PlayerData white, out PlayerData black);
+
+            white.WhiteCount++;
+            black.BlackCount++;
+
+            round.Matches.Add(new MatchData
+            {
+                BoardNumber = boardNumber,
+                WhitePlayerId = white.Id,
+                BlackPlayerId = black.Id,
+                Result = MatchResult.NotPlayed,
+                IsBye = false
+            });
+
+            boardNumber++;
+        }
+
+        return round;
+    }
+
+    private PlayerData FindBestOpponent(PlayerData player, List<PlayerData> candidates)
+    {
+        PlayerData best = null;
+        float bestScoreDiff = float.MaxValue;
+
+        foreach (PlayerData candidate in candidates)
+        {
+            if (HavePlayedBefore(player.Id, candidate.Id))
+                continue;
+
+            float scoreDiff = Mathf.Abs(player.Score - candidate.Score);
+
+            if (scoreDiff < bestScoreDiff)
+            {
+                bestScoreDiff = scoreDiff;
+                best = candidate;
+            }
+        }
+
+        return best;
+    }
+
+    private bool HavePlayedBefore(int playerAId, int playerBId)
+    {
+        TournamentData tournament = TournamentManager.Instance.CurrentTournament;
+
+        foreach (RoundData round in tournament.Rounds)
+        {
+            foreach (MatchData match in round.Matches)
+            {
+                if (match.IsBye)
+                    continue;
+
+                bool samePair =
+                    (match.WhitePlayerId == playerAId && match.BlackPlayerId == playerBId) ||
+                    (match.WhitePlayerId == playerBId && match.BlackPlayerId == playerAId);
+
+                if (samePair)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    private PlayerData FindByePlayer(List<PlayerData> players)
+    {
+        List<PlayerData> candidates = new List<PlayerData>();
+
+        foreach (PlayerData player in players)
+        {
+            if (!player.HadBye)
+                candidates.Add(player);
+        }
+
+        if (candidates.Count == 0)
+            candidates = players;
+
+        candidates.Sort((a, b) =>
+        {
+            int scoreCompare = a.Score.CompareTo(b.Score);
+            if (scoreCompare != 0)
+                return scoreCompare;
+
+            return a.Id.CompareTo(b.Id);
+        });
+
+        return candidates[0];
+    }
+
+    private void AssignColors(
+        PlayerData playerA,
+        PlayerData playerB,
+        out PlayerData white,
+        out PlayerData black)
+    {
+        int colorBalanceA = playerA.WhiteCount - playerA.BlackCount;
+        int colorBalanceB = playerB.WhiteCount - playerB.BlackCount;
+
+        if (colorBalanceA > colorBalanceB)
+        {
+            white = playerB;
+            black = playerA;
+        }
+        else if (colorBalanceB > colorBalanceA)
+        {
+            white = playerA;
+            black = playerB;
+        }
+        else
+        {
+            white = playerA.Id < playerB.Id ? playerA : playerB;
+            black = white == playerA ? playerB : playerA;
+        }
+    }
 
     private PlayerData FindPlayer(int playerId)
     {

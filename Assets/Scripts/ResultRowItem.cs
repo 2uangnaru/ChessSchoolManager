@@ -17,10 +17,11 @@ public class ResultRowItem : MonoBehaviour
 
     private readonly Color normalColor = new Color(1f, 1f, 1f, 0.1f);
     private readonly Color selectedColor = new Color(0.4f, 0.7f, 1f, 0.5f);
-
+    private bool isBye;
     public void Setup(MatchData match, string whiteName, string blackName, Action<ResultRowItem, MatchData> onClick)
     {
         matchData = match;
+        isBye = match.IsBye;
         onSelected = onClick;
 
         boardText.text = $"Bàn {match.BoardNumber}";
@@ -29,9 +30,24 @@ public class ResultRowItem : MonoBehaviour
 
         RefreshResultText();
 
+        if (isBye)
+        {
+            resultText.text = "Miễn đấu";
+            selectButton.interactable = false;
+            background.color = new Color(0.5f, 0.5f, 0.5f, 0.25f);
+        }
+        else
+        {
+            selectButton.interactable = true;
+            SetSelected(false);
+        }
+
         selectButton.onClick.RemoveAllListeners();
         selectButton.onClick.AddListener(() =>
         {
+            if (isBye)
+                return;
+
             onSelected?.Invoke(this, matchData);
         });
 
@@ -51,6 +67,11 @@ public class ResultRowItem : MonoBehaviour
 
     public void SetSelected(bool selected)
     {
+        if (isBye)
+        {
+            background.color = new Color(0.5f, 0.5f, 0.5f, 0.25f);
+            return;
+        }
         background.color = selected ? selectedColor : normalColor;
     }
 }

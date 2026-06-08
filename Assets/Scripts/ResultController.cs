@@ -94,12 +94,24 @@ public class ResultController : MonoBehaviour
 
             ResultRowItem row = Instantiate(resultRowPrefab, resultRowsContent);
 
-            row.Setup(
-                match,
-                white != null ? white.Name : "Không tìm thấy",
-                black != null ? black.Name : "Không tìm thấy",
-                OnRowSelected
-            );
+            if (match.IsBye)
+            {
+                row.Setup(
+                    match,
+                    white != null ? white.Name : "Không tìm thấy",
+                    "Miễn đấu",
+                    OnRowSelected
+                );
+            }
+            else
+            {
+                row.Setup(
+                    match,
+                    white != null ? white.Name : "Không tìm thấy",
+                    black != null ? black.Name : "Không tìm thấy",
+                    OnRowSelected
+                );
+            }
         }
 
         UpdatePaginationUI(totalItems);
@@ -123,6 +135,9 @@ public class ResultController : MonoBehaviour
 
         foreach (MatchData match in round.Matches)
         {
+            if (match.IsBye)
+                continue;
+
             if (match.Result == MatchResult.NotPlayed)
             {
                 allDone = false;
@@ -218,6 +233,9 @@ public class ResultController : MonoBehaviour
 
         foreach (MatchData match in round.Matches)
         {
+            if (match.IsBye)
+                continue;
+
             PlayerData white = FindPlayer(match.WhitePlayerId);
             PlayerData black = FindPlayer(match.BlackPlayerId);
 
@@ -243,6 +261,8 @@ public class ResultController : MonoBehaviour
                     break;
             }
         }
+
+
 
         round.IsFinished = true;
         tournament.CurrentRound++;
