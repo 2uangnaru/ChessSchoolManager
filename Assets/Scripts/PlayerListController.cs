@@ -2,7 +2,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-
+using System.IO;
 public class PlayerListController : MonoBehaviour
 {
     [Header("Inputs")]
@@ -79,6 +79,16 @@ public class PlayerListController : MonoBehaviour
 
         RefreshFromCurrentTournament();
         SaveLoadManager.SaveTournament(tournament);
+    }
+
+    public void ImportExcel()
+    {
+        string filePath = Path.Combine(Application.dataPath, "students.xlsx");
+
+        XlsxStudentImporter.ImportFromXlsx(filePath);
+
+        currentPage = 1;
+        RefreshFromCurrentTournament();
     }
 
     private int GetNextPlayerId(List<PlayerData> players)
