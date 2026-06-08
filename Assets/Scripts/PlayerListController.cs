@@ -12,78 +12,98 @@ public class PlayerListController : MonoBehaviour
     [SerializeField] private Transform studentRowsContent;
     [SerializeField] private StudentRowItem studentRowPrefab;
 
-    private int nextPlayerId = 1;
-
     public void AddPlayer()
     {
-        if (TournamentManager.Instance.CurrentTournament == null)
+        TournamentData tournament = TournamentManager.Instance.CurrentTournament;
+
+        if (tournament == null)
         {
-            Debug.LogWarning("Chưa có giải đấu. Hãy tạo giải trước.");
+            Debug.LogWarning("Chưa có giải đấu.");
             return;
         }
 
         string playerName = nameInput.text.Trim();
         string className = classInput.text.Trim();
 
-        if (string.IsNullOrEmpty(playerName))
+        if (string.IsNullOrEmpty(playerName) || string.IsNullOrEmpty(className))
         {
-            Debug.LogWarning("Chưa nhập họ tên học sinh");
+            Debug.LogWarning("Chưa nhập đủ họ tên/lớp.");
             return;
         }
 
-        if (string.IsNullOrEmpty(className))
-        {
-            Debug.LogWarning("Chưa nhập lớp");
-            return;
-        }
+        int nextId = GetNextPlayerId(tournament.Players);
 
         PlayerData player = new PlayerData
         {
-            Id = nextPlayerId++,
+            Id = nextId,
             Name = playerName,
             ClassName = className,
             Score = 0,
             WhiteCount = 0,
             BlackCount = 0,
-            HadBye = false
+            HadBye = false,
+            InitialElo = 1000,
+            CurrentElo = 1000
         };
 
-        TournamentManager.Instance.CurrentTournament.Players.Add(player);
+        tournament.Players.Add(player);
 
         nameInput.text = "";
         classInput.text = "";
 
-        RefreshTable();
+        RefreshFromCurrentTournament();
+        SaveLoadManager.SaveTournament(tournament);
+    }
 
-        SaveLoadManager.SaveTournament(TournamentManager.Instance.CurrentTournament);
+    private int GetNextPlayerId(List<PlayerData> players)
+    {
+        int maxId = 0;
+
+        foreach (PlayerData player in players)
+        {
+            if (player.Id > maxId)
+                maxId = player.Id;
+        }
+
+        return maxId + 1;
     }
 
     private void DeletePlayer(PlayerData player)
     {
-        TournamentManager.Instance.CurrentTournament.Players.Remove(player);
-        RefreshTable();
-        SaveLoadManager.SaveTournament(TournamentManager.Instance.CurrentTournament);
+        TournamentData tournament = TournamentManager.Instance.CurrentTournament;
+
+        if (tournament == null)
+            return;
+
+        tournament.Players.Remove(player);
+
+        RefreshFromCurrentTournament();
+        SaveLoadManager.SaveTournament(tournament);
     }
 
-    private void RefreshTable()
+    public void RefreshFromCurrentTournament()
+    {
+        ClearTable();
+
+        TournamentData tournament = TournamentManager.Instance.CurrentTournament;
+
+        if (tournament == null)
+            return;
+
+        for (int i = 0; i < tournament.Players.Count; i++)
+        {
+            StudentRowItem row =
+                Instantiate(studentRowPrefab, studentRowsContent);
+
+            row.Setup(tournament.Players[i], i + 1, DeletePlayer);
+        }
+    }
+
+    private void ClearTable()
     {
         foreach (Transform child in studentRowsContent)
         {
             Destroy(child.gameObject);
         }
-
-        List<PlayerData> players = TournamentManager.Instance.CurrentTournament.Players;
-
-        for (int i = 0; i < players.Count; i++)
-        {
-            StudentRowItem row = Instantiate(studentRowPrefab, studentRowsContent);
-            row.Setup(players[i], i + 1, DeletePlayer);
-        }
     }
-
-    public void RefreshFromCurrentTournament()
-    {
-        RefreshTable();
-    }
-
 }

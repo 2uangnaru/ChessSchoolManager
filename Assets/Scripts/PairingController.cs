@@ -23,15 +23,18 @@ public class PairingController : MonoBehaviour
     {
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
 
-        if (tournament == null)
+        int nextRound = tournament.CurrentRound + 1;
+
+        if (tournament.CurrentRound >= tournament.TotalRounds)
         {
-            roundTitleText.text = "CHƯA CÓ GIẢI ĐẤU";
-            totalPlayersText.text = "Tổng học sinh: 0";
+            roundTitleText.text = "GIẢI ĐẤU ĐÃ KẾT THÚC";
+            totalPlayersText.text = $"Tổng học sinh: {tournament.Players.Count}";
             totalBoardsText.text = "Số bàn: 0";
+
+            generatePairingButton.interactable = false;
             return;
         }
 
-        int nextRound = tournament.CurrentRound + 1;
         bool alreadyPaired = tournament.Rounds.Exists(
         r => r.RoundNumber == nextRound);
 
@@ -48,6 +51,12 @@ public class PairingController : MonoBehaviour
     {
 
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
+
+        if (tournament.CurrentRound >= tournament.TotalRounds)
+        {
+            Debug.LogWarning("Giải đấu đã kết thúc, không thể bốc thăm thêm.");
+            return;
+        }
 
         int roundNumber = tournament.CurrentRound + 1;
 
@@ -124,6 +133,11 @@ public class PairingController : MonoBehaviour
         Debug.Log($"Đã tạo bốc thăm ván {roundNumber}");
     }
 
+    public void RefreshPairingPanel()
+    {
+        RefreshInfo();
+        RefreshPairingTable();
+    }
     private void RefreshPairingTable()
     {
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
@@ -155,6 +169,9 @@ public class PairingController : MonoBehaviour
             );
         }
     }
+
+
+
 
     private PlayerData FindPlayer(int playerId)
     {

@@ -9,6 +9,14 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private GameObject pairingPanel;
     [SerializeField] private GameObject playerListPanel;
     [SerializeField] private PlayerListController playerListController;
+    [SerializeField] private GameObject resultPanel;
+    [SerializeField] private GameObject rankingPanel;
+    [SerializeField] private PairingController pairingController;
+    [SerializeField] private ResultController resultController;
+    [SerializeField] private RankingController rankingController;
+
+
+
     private void Start()
     {
         ShowCreateTournament();
@@ -17,6 +25,16 @@ public class MainMenuController : MonoBehaviour
     public void ShowCreateTournament()
     {
         ShowOnly(createTournamentPanel);
+    }
+
+    public void ShowRanking()
+    {
+        ShowOnly(rankingPanel);
+    }
+
+    public void ShowResult()
+    {
+        ShowOnly(resultPanel);
     }
 
     public void ShowPlayerList()
@@ -45,7 +63,15 @@ public class MainMenuController : MonoBehaviour
         importTournamentPanel.SetActive(targetPanel == importTournamentPanel);
         pairingPanel.SetActive(targetPanel == pairingPanel);
         playerListPanel.SetActive(targetPanel == playerListPanel);
+        resultPanel.SetActive(targetPanel == resultPanel);
+        rankingPanel.SetActive(targetPanel == rankingPanel);
+
+
+
     }
+
+
+
 
     public void OpenSavedTournament()
     {
@@ -63,5 +89,15 @@ public class MainMenuController : MonoBehaviour
 
         playerListController.RefreshFromCurrentTournament();
     }
+
+    public void ResetAllRuntimePanels()
+    {
+        playerListController?.RefreshFromCurrentTournament();
+        resultController?.RefreshResultPanel();
+        rankingController?.RefreshRanking();
+        pairingController?.RefreshPairingPanel();
+        rankingController?.RefreshRanking();
+    }
+
 
 }

@@ -16,4 +16,6 @@ public class TournamentData
     // chuẩn bị cho bước tiếp theo
 
     public List<RoundData> Rounds = new();
+
+
 }
