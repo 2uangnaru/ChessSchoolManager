@@ -10,6 +10,7 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private GameObject playerListPanel;
     [SerializeField] private PlayerListController playerListController;
     [SerializeField] private GameObject resultPanel;
+    [SerializeField] private GameObject rankingPanel;
     private void Start()
     {
         ShowCreateTournament();
@@ -18,6 +19,11 @@ public class MainMenuController : MonoBehaviour
     public void ShowCreateTournament()
     {
         ShowOnly(createTournamentPanel);
+    }
+
+    public void ShowRanking()
+    {
+        ShowOnly(rankingPanel);
     }
 
     public void ShowResult()
@@ -52,6 +58,7 @@ public class MainMenuController : MonoBehaviour
         pairingPanel.SetActive(targetPanel == pairingPanel);
         playerListPanel.SetActive(targetPanel == playerListPanel);
         resultPanel.SetActive(targetPanel == resultPanel);
+        rankingPanel.SetActive(targetPanel == rankingPanel);
     }
 
     public void OpenSavedTournament()

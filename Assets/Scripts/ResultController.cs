@@ -1,11 +1,14 @@
 ﻿using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ResultController : MonoBehaviour
 {
     [SerializeField] private TMP_Text resultTitleText;
     [SerializeField] private Transform resultRowsContent;
     [SerializeField] private ResultRowItem resultRowPrefab;
+    [SerializeField] private MainMenuController mainMenuController;
+    [SerializeField] private Button finishRoundButton;
 
     private ResultRowItem selectedRow;
     private MatchData selectedMatch;
@@ -52,6 +55,34 @@ public class ResultController : MonoBehaviour
                 OnRowSelected
             );
         }
+
+        UpdateFinishButtonState();
+    }
+
+    private void UpdateFinishButtonState()
+    {
+        TournamentData tournament = TournamentManager.Instance.CurrentTournament;
+
+        if (tournament == null || tournament.Rounds.Count == 0)
+        {
+            finishRoundButton.interactable = false;
+            return;
+        }
+
+        RoundData round = tournament.Rounds[tournament.Rounds.Count - 1];
+
+        bool allDone = true;
+
+        foreach (MatchData match in round.Matches)
+        {
+            if (match.Result == MatchResult.NotPlayed)
+            {
+                allDone = false;
+                break;
+            }
+        }
+
+        finishRoundButton.interactable = allDone && !round.IsFinished;
     }
 
     private void OnRowSelected(ResultRowItem row, MatchData match)
@@ -95,6 +126,7 @@ public class ResultController : MonoBehaviour
 
         selectedMatch.Result = result;
         selectedRow.RefreshResultText();
+        UpdateFinishButtonState();
 
         SaveLoadManager.SaveTournament(
             TournamentManager.Instance.CurrentTournament
@@ -168,6 +200,8 @@ public class ResultController : MonoBehaviour
         tournament.CurrentRound++;
 
         SaveLoadManager.SaveTournament(tournament);
+
+        mainMenuController.ShowPairing();
 
         Debug.Log($"Đã chốt ván {round.RoundNumber}. Sang ván {tournament.CurrentRound + 1}");
     }
