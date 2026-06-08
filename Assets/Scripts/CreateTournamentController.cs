@@ -17,7 +17,9 @@ public class CreateTournamentController : MonoBehaviour
             return;
         }
 
-        int totalRounds = int.Parse(roundDropdown.options[roundDropdown.value].text);
+        int totalRounds = int.Parse(
+            roundDropdown.options[roundDropdown.value].text
+        );
 
         TournamentData data = new TournamentData
         {
@@ -26,12 +28,19 @@ public class CreateTournamentController : MonoBehaviour
             CurrentRound = 0
         };
 
+        data.Players.Clear();
+        data.Rounds.Clear();
+
         TournamentManager.Instance.CurrentTournament = data;
 
         SaveLoadManager.SaveTournament(data);
 
-        Debug.Log($"Đã tạo giải: {data.TournamentName} | Số ván: {data.TotalRounds}");
+        mainMenuController.ResetAllRuntimePanels();
+
+        tournamentNameInput.text = "";
 
         mainMenuController.ShowPlayerList();
+
+        Debug.Log($"Đã tạo giải mới: {data.TournamentName} | Số ván: {data.TotalRounds}");
     }
 }

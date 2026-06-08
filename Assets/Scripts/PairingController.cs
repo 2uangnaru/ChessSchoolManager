@@ -133,6 +133,11 @@ public class PairingController : MonoBehaviour
         Debug.Log($"Đã tạo bốc thăm ván {roundNumber}");
     }
 
+    public void RefreshPairingPanel()
+    {
+        RefreshInfo();
+        RefreshPairingTable();
+    }
     private void RefreshPairingTable()
     {
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
@@ -164,6 +169,9 @@ public class PairingController : MonoBehaviour
             );
         }
     }
+
+
+
 
     private PlayerData FindPlayer(int playerId)
     {

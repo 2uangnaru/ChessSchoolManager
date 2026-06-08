@@ -34,6 +34,8 @@ public class RankingController : MonoBehaviour
 
         List<PlayerData> sortedPlayers = tournament.Players
             .OrderByDescending(p => p.Score)
+            .ThenByDescending(p => CalculateBuchholz(p, tournament))
+            .ThenByDescending(p => CalculateWinCount(p, tournament))
             .ThenByDescending(p => p.CurrentElo)
             .ThenBy(p => p.Name)
             .ToList();
@@ -46,4 +48,58 @@ public class RankingController : MonoBehaviour
             row.Setup(i + 1, sortedPlayers[i]);
         }
     }
+
+    private float CalculateBuchholz(PlayerData player, TournamentData tournament)
+    {
+        float total = 0f;
+
+        foreach (RoundData round in tournament.Rounds)
+        {
+            foreach (MatchData match in round.Matches)
+            {
+                int opponentId = -1;
+
+                if (match.WhitePlayerId == player.Id)
+                    opponentId = match.BlackPlayerId;
+                else if (match.BlackPlayerId == player.Id)
+                    opponentId = match.WhitePlayerId;
+
+                if (opponentId == -1)
+                    continue;
+
+                PlayerData opponent = tournament.Players.Find(p => p.Id == opponentId);
+
+                if (opponent != null)
+                    total += opponent.Score;
+            }
+        }
+
+        return total;
+    }
+
+    private int CalculateWinCount(PlayerData player, TournamentData tournament)
+    {
+        int wins = 0;
+
+        foreach (RoundData round in tournament.Rounds)
+        {
+            foreach (MatchData match in round.Matches)
+            {
+                if (match.WhitePlayerId == player.Id &&
+                    match.Result == MatchResult.WhiteWin)
+                {
+                    wins++;
+                }
+
+                if (match.BlackPlayerId == player.Id &&
+                    match.Result == MatchResult.BlackWin)
+                {
+                    wins++;
+                }
+            }
+        }
+
+        return wins;
+    }
+
 }
