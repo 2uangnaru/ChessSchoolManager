@@ -9,6 +9,7 @@ public class StudentRowItem : MonoBehaviour
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private TMP_Text classText;
     [SerializeField] private Button deleteButton;
+    [SerializeField] private TMP_Text eloText;
 
     private PlayerData playerData;
     private Action<PlayerData> onDeleteClicked;
@@ -21,6 +22,7 @@ public class StudentRowItem : MonoBehaviour
         indexText.text = index.ToString("00");
         nameText.text = data.Name;
         classText.text = data.ClassName;
+        eloText.text = data.CurrentElo.ToString();
 
         deleteButton.onClick.RemoveAllListeners();
         deleteButton.onClick.AddListener(() =>
