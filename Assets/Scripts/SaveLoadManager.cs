@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq;
 public static class SaveLoadManager
 {
     private const string SAVE_FILE_NAME = "current_tournament.json";
@@ -115,24 +117,14 @@ public static class SaveLoadManager
 
     public static List<string> GetTournamentNames()
     {
-        List<string> result = new();
-
         if (!Directory.Exists(TournamentFolder))
-            return result;
+            return new List<string>();
 
-        string[] files =
-            Directory.GetFiles(TournamentFolder, "*.json");
-
-        foreach (string file in files)
-        {
-            result.Add(
-                Path.GetFileNameWithoutExtension(file)
-            );
-        }
-
-        return result;
-
-
+        return Directory
+            .GetFiles(TournamentFolder, "*.json")
+            .OrderBy(f => File.GetLastWriteTime(f))
+            .Select(f => Path.GetFileNameWithoutExtension(f))
+            .ToList();
     }
 
     public static void DeleteTournament(string tournamentName)
