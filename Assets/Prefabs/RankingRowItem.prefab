@@ -547,6 +547,7 @@ GameObject:
   - component: {fileID: 1507675643984498942}
   - component: {fileID: 1997390948272457457}
   - component: {fileID: 7745723101709813806}
+  - component: {fileID: 8592327462594809011}
   m_Layer: 5
   m_Name: RankingRowItem
   m_TagString: Untagged
@@ -616,6 +617,23 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &8592327462594809011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7029205205780346853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44d267182cd9e1c40a83dc1436a225e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rankText: {fileID: 1741554532982423083}
+  nameText: {fileID: 2808595628253172688}
+  classText: {fileID: 3838624942498490426}
+  scoreText: {fileID: 5840225701925124138}
+  eloText: {fileID: 1947549182164685504}
 --- !u!1 &8609678365274424111
 GameObject:
   m_ObjectHideFlags: 0
