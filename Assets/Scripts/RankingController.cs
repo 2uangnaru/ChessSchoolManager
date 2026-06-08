@@ -2,16 +2,52 @@
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RankingController : MonoBehaviour
 {
     [SerializeField] private TMP_Text rankingTitleText;
     [SerializeField] private Transform rankingRowsContent;
     [SerializeField] private RankingRowItem rankingRowPrefab;
+    [SerializeField] private Button previousPageButton;
+    [SerializeField] private Button nextPageButton;
+    [SerializeField] private TMP_Text pageInfoText;
 
+    private int currentPage = 1;
+    private const int pageSize = 9;
     private void OnEnable()
     {
         RefreshRanking();
+    }
+
+    public void PreviousPage()
+    {
+        if (currentPage <= 1) return;
+        currentPage--;
+        RefreshRanking();
+    }
+
+    public void NextPage()
+    {
+        currentPage++;
+        RefreshRanking();
+    }
+
+    private int GetTotalPages(int totalItems)
+    {
+        if (totalItems <= 0) return 1;
+        return Mathf.CeilToInt(totalItems / (float)pageSize);
+    }
+
+    private void UpdatePaginationUI(int totalItems)
+    {
+        int totalPages = GetTotalPages(totalItems);
+
+        currentPage = Mathf.Clamp(currentPage, 1, totalPages);
+
+        pageInfoText.text = $"Trang {currentPage} / {totalPages}";
+        previousPageButton.interactable = currentPage > 1;
+        nextPageButton.interactable = currentPage < totalPages;
     }
 
     public void RefreshRanking()
@@ -26,6 +62,7 @@ public class RankingController : MonoBehaviour
         if (tournament == null)
         {
             rankingTitleText.text = "CHƯA CÓ GIẢI ĐẤU";
+            UpdatePaginationUI(0);
             return;
         }
 
@@ -40,13 +77,23 @@ public class RankingController : MonoBehaviour
             .ThenBy(p => p.Name)
             .ToList();
 
-        for (int i = 0; i < sortedPlayers.Count; i++)
+        int totalItems = sortedPlayers.Count;
+        int totalPages = GetTotalPages(totalItems);
+
+        currentPage = Mathf.Clamp(currentPage, 1, totalPages);
+
+        int startIndex = (currentPage - 1) * pageSize;
+        int endIndex = Mathf.Min(startIndex + pageSize, totalItems);
+
+        for (int i = startIndex; i < endIndex; i++)
         {
             RankingRowItem row =
                 Instantiate(rankingRowPrefab, rankingRowsContent);
 
             row.Setup(i + 1, sortedPlayers[i]);
         }
+
+        UpdatePaginationUI(totalItems);
     }
 
     private float CalculateBuchholz(PlayerData player, TournamentData tournament)
