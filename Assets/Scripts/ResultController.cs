@@ -9,6 +9,12 @@ public class ResultController : MonoBehaviour
     [SerializeField] private ResultRowItem resultRowPrefab;
     [SerializeField] private MainMenuController mainMenuController;
     [SerializeField] private Button finishRoundButton;
+    [SerializeField] private Button previousPageButton;
+    [SerializeField] private Button nextPageButton;
+    [SerializeField] private TMP_Text pageInfoText;
+
+    private int currentPage = 1;
+    private const int pageSize = 6;
 
     private ResultRowItem selectedRow;
     private MatchData selectedMatch;
@@ -18,6 +24,35 @@ public class ResultController : MonoBehaviour
         RefreshResultPanel();
     }
 
+    public void PreviousPage()
+    {
+        if (currentPage <= 1) return;
+        currentPage--;
+        RefreshResultPanel();
+    }
+
+    public void NextPage()
+    {
+        currentPage++;
+        RefreshResultPanel();
+    }
+
+    private int GetTotalPages(int totalItems)
+    {
+        if (totalItems <= 0) return 1;
+        return Mathf.CeilToInt(totalItems / (float)pageSize);
+    }
+
+    private void UpdatePaginationUI(int totalItems)
+    {
+        int totalPages = GetTotalPages(totalItems);
+
+        currentPage = Mathf.Clamp(currentPage, 1, totalPages);
+
+        pageInfoText.text = $"Trang {currentPage} / {totalPages}";
+        previousPageButton.interactable = currentPage > 1;
+        nextPageButton.interactable = currentPage < totalPages;
+    }
     public void RefreshResultPanel()
     {
         selectedRow = null;
@@ -33,6 +68,7 @@ public class ResultController : MonoBehaviour
         if (tournament == null || tournament.Rounds.Count == 0)
         {
             resultTitleText.text = "CHƯA CÓ VÁN ĐẤU";
+            UpdatePaginationUI(0);
             return;
         }
 
@@ -41,8 +77,18 @@ public class ResultController : MonoBehaviour
         resultTitleText.text =
             $"KẾT QUẢ VÁN {round.RoundNumber} / {tournament.TotalRounds}";
 
-        foreach (MatchData match in round.Matches)
+        int totalItems = round.Matches.Count;
+        int totalPages = GetTotalPages(totalItems);
+
+        currentPage = Mathf.Clamp(currentPage, 1, totalPages);
+
+        int startIndex = (currentPage - 1) * pageSize;
+        int endIndex = Mathf.Min(startIndex + pageSize, totalItems);
+
+        for (int i = startIndex; i < endIndex; i++)
         {
+            MatchData match = round.Matches[i];
+
             PlayerData white = FindPlayer(match.WhitePlayerId);
             PlayerData black = FindPlayer(match.BlackPlayerId);
 
@@ -55,6 +101,8 @@ public class ResultController : MonoBehaviour
                 OnRowSelected
             );
         }
+
+        UpdatePaginationUI(totalItems);
 
         UpdateFinishButtonState();
     }

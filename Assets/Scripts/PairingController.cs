@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PairingController : MonoBehaviour
 {
@@ -13,10 +14,47 @@ public class PairingController : MonoBehaviour
     [SerializeField] private Transform pairingRowsContent;
     [SerializeField] private PairingRowItem pairingRowPrefab;
 
+    [SerializeField] private Button previousPageButton;
+    [SerializeField] private Button nextPageButton;
+    [SerializeField] private TMP_Text pageInfoText;
+
+    private int currentPage = 1;
+    private const int pageSize = 6;
+
     private void OnEnable()
     {
         RefreshInfo();
         RefreshPairingTable();
+    }
+
+    public void PreviousPage()
+    {
+        if (currentPage <= 1) return;
+        currentPage--;
+        RefreshPairingTable();
+    }
+
+    public void NextPage()
+    {
+        currentPage++;
+        RefreshPairingTable();
+    }
+
+    private int GetTotalPages(int totalItems)
+    {
+        if (totalItems <= 0) return 1;
+        return Mathf.CeilToInt(totalItems / (float)pageSize);
+    }
+
+    private void UpdatePaginationUI(int totalItems)
+    {
+        int totalPages = GetTotalPages(totalItems);
+
+        currentPage = Mathf.Clamp(currentPage, 1, totalPages);
+
+        pageInfoText.text = $"Trang {currentPage} / {totalPages}";
+        previousPageButton.interactable = currentPage > 1;
+        nextPageButton.interactable = currentPage < totalPages;
     }
 
     private void RefreshInfo()
@@ -151,12 +189,24 @@ public class PairingController : MonoBehaviour
         }
 
         if (tournament == null || tournament.Rounds.Count == 0)
+        {
+            UpdatePaginationUI(0);
             return;
-
+        }
         RoundData latestRound = tournament.Rounds[tournament.Rounds.Count - 1];
 
-        foreach (MatchData match in latestRound.Matches)
+        int totalItems = latestRound.Matches.Count;
+        int totalPages = GetTotalPages(totalItems);
+
+        currentPage = Mathf.Clamp(currentPage, 1, totalPages);
+
+        int startIndex = (currentPage - 1) * pageSize;
+        int endIndex = Mathf.Min(startIndex + pageSize, totalItems);
+
+        for (int i = startIndex; i < endIndex; i++)
         {
+            MatchData match = latestRound.Matches[i];
+
             PlayerData white = FindPlayer(match.WhitePlayerId);
             PlayerData black = FindPlayer(match.BlackPlayerId);
 
@@ -168,6 +218,8 @@ public class PairingController : MonoBehaviour
                 black != null ? black.Name : "Không tìm thấy"
             );
         }
+
+        UpdatePaginationUI(totalItems);
     }
 
 

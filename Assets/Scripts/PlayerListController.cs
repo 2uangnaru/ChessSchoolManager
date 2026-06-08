@@ -21,11 +21,26 @@ public class PlayerListController : MonoBehaviour
 
 
     private int currentPage = 1;
-    private const int pageSize = 8;
+    private const int pageSize = 6;
 
     public void AddPlayer()
     {
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
+
+
+
+        if (tournament == null)
+        {
+            Debug.LogWarning("Chưa có giải đấu.");
+            return;
+        }
+
+        if (tournament.Rounds.Count > 0)
+        {
+            Debug.LogWarning("Đã bốc thăm rồi, không thể thêm học sinh.");
+            return;
+        }
+
 
         if (tournament == null)
         {
@@ -82,6 +97,12 @@ public class PlayerListController : MonoBehaviour
     private void DeletePlayer(PlayerData player)
     {
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
+
+        if (tournament.Rounds.Count > 0)
+        {
+            Debug.LogWarning("Đã bốc thăm rồi, không thể xóa học sinh.");
+            return;
+        }
 
         if (tournament == null)
             return;
