@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerListController : MonoBehaviour
 {
@@ -11,6 +12,16 @@ public class PlayerListController : MonoBehaviour
     [Header("Table")]
     [SerializeField] private Transform studentRowsContent;
     [SerializeField] private StudentRowItem studentRowPrefab;
+
+    [Header("Pagination")]
+    [SerializeField] private TMP_Text pageInfoText;
+
+    [SerializeField] private Button previousPageButton;
+    [SerializeField] private Button nextPageButton;
+
+
+    private int currentPage = 1;
+    private const int pageSize = 8;
 
     public void AddPlayer()
     {
@@ -88,16 +99,77 @@ public class PlayerListController : MonoBehaviour
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
 
         if (tournament == null)
+        {
+            UpdatePaginationUI(0);
             return;
+        }
 
-        for (int i = 0; i < tournament.Players.Count; i++)
+        int totalPlayers = tournament.Players.Count;
+        int totalPages = GetTotalPages(totalPlayers);
+
+        if (currentPage > totalPages)
+            currentPage = totalPages;
+
+        if (currentPage < 1)
+            currentPage = 1;
+
+        int startIndex = (currentPage - 1) * pageSize;
+        int endIndex = Mathf.Min(startIndex + pageSize, totalPlayers);
+
+        for (int i = startIndex; i < endIndex; i++)
         {
             StudentRowItem row =
                 Instantiate(studentRowPrefab, studentRowsContent);
 
             row.Setup(tournament.Players[i], i + 1, DeletePlayer);
         }
+
+        UpdatePaginationUI(totalPlayers);
     }
+
+    private void UpdatePaginationUI(int totalItems)
+    {
+        int totalPages = GetTotalPages(totalItems);
+
+        pageInfoText.text = $"Trang {currentPage} / {totalPages}";
+
+        previousPageButton.interactable = currentPage > 1;
+        nextPageButton.interactable = currentPage < totalPages;
+    }
+
+    public void PreviousPage()
+    {
+        if (currentPage <= 1)
+            return;
+
+        currentPage--;
+        RefreshFromCurrentTournament();
+    }
+
+    public void NextPage()
+    {
+        TournamentData tournament = TournamentManager.Instance.CurrentTournament;
+
+        if (tournament == null)
+            return;
+
+        int totalPages = GetTotalPages(tournament.Players.Count);
+
+        if (currentPage >= totalPages)
+            return;
+
+        currentPage++;
+        RefreshFromCurrentTournament();
+    }
+
+    private int GetTotalPages(int totalItems)
+    {
+        if (totalItems <= 0)
+            return 1;
+
+        return Mathf.CeilToInt(totalItems / (float)pageSize);
+    }
+
 
     private void ClearTable()
     {
