@@ -139,6 +139,13 @@ public static class XlsxStudentImporter
                             value = sharedStrings[sharedIndex];
                     }
                 }
+                else if (cellType == "inlineStr")
+                {
+                    XmlNode textNode = cellNode.SelectSingleNode(".//*[local-name()='t']");
+
+                    if (textNode != null)
+                        value = textNode.InnerText;
+                }
 
                 row[colName] = value;
             }

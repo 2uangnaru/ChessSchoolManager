@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
+using SFB;
 public class PlayerListController : MonoBehaviour
 {
     [Header("Inputs")]
@@ -88,12 +89,30 @@ public class PlayerListController : MonoBehaviour
 
     public void ImportExcel()
     {
-        string filePath = Path.Combine(Application.dataPath, "students.xlsx");
+        Debug.Log("IMPORT CLICK");
+
+        var paths = StandaloneFileBrowser.OpenFilePanel(
+            "Chọn file Excel",
+            "",
+            "xlsx",
+            false
+        );
+
+        Debug.Log($"Selected count: {paths.Length}");
+
+        if (paths.Length == 0)
+            return;
+
+        string filePath = paths[0];
+
+        Debug.Log($"Selected file: {filePath}");
 
         XlsxStudentImporter.ImportFromXlsx(filePath);
 
         currentPage = 1;
         RefreshFromCurrentTournament();
+
+        Debug.Log("IMPORT DONE");
     }
 
     private int GetNextPlayerId(List<PlayerData> players)
