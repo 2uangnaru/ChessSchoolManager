@@ -74,6 +74,11 @@ public class PlayerListController : MonoBehaviour
 
         tournament.Players.Add(player);
 
+
+
+        FindFirstObjectByType<MainMenuController>()
+    ?.RefreshLeftMenuButtons();
+
         nameInput.text = "";
         classInput.text = "";
 
@@ -118,6 +123,9 @@ public class PlayerListController : MonoBehaviour
             return;
 
         tournament.Players.Remove(player);
+
+        FindFirstObjectByType<MainMenuController>()
+            ?.RefreshLeftMenuButtons();
 
         RefreshFromCurrentTournament();
         SaveLoadManager.SaveTournament(tournament);

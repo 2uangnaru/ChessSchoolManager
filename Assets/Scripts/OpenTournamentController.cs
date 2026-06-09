@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class OpenTournamentController : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class OpenTournamentController : MonoBehaviour
     [SerializeField] private SavedTournamentRowItem rowPrefab;
     [SerializeField] private MainMenuController mainMenuController;
     [SerializeField] private PlayerListController playerListController;
+    [SerializeField] private Button openSelectedButton;
     private SavedTournamentRowItem selectedRow;
     private string selectedTournament;
 
@@ -32,6 +34,11 @@ public class OpenTournamentController : MonoBehaviour
 
             row.Setup(tournamentName, OnTournamentSelected);
         }
+
+        selectedTournament = null;
+        selectedRow = null;
+
+        openSelectedButton.interactable = false;
     }
 
     public void DeleteSelectedTournament()
@@ -48,6 +55,7 @@ public class OpenTournamentController : MonoBehaviour
         selectedRow = null;
 
         RefreshList();
+        mainMenuController.RefreshLeftMenuButtons();
     }
 
     public void OpenSelectedTournament()
@@ -68,6 +76,8 @@ public class OpenTournamentController : MonoBehaviour
 
         TournamentManager.Instance.CurrentTournament = data;
 
+        mainMenuController.RefreshLeftMenuButtons();
+
         mainMenuController.ShowPlayerList();
 
         playerListController.RefreshFromCurrentTournament();
@@ -87,5 +97,6 @@ public class OpenTournamentController : MonoBehaviour
         selectedRow.SetSelected(true);
 
         Debug.Log($"Đã chọn giải: {tournamentName}");
+        openSelectedButton.interactable = true;
     }
 }

@@ -12,6 +12,7 @@ public class RankingController : MonoBehaviour
     [SerializeField] private Button previousPageButton;
     [SerializeField] private Button nextPageButton;
     [SerializeField] private TMP_Text pageInfoText;
+    [SerializeField] private Button exportRankingButton;
 
     private int currentPage = 1;
     private const int pageSize = 9;
@@ -59,10 +60,20 @@ public class RankingController : MonoBehaviour
 
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
 
+        if (exportRankingButton != null)
+        {
+            exportRankingButton.interactable =
+                tournament != null &&
+                tournament.Rounds.Count > 0;
+        }
+
         if (tournament == null)
         {
             rankingTitleText.text = "CHƯA CÓ GIẢI ĐẤU";
             UpdatePaginationUI(0);
+            if (exportRankingButton != null)
+                exportRankingButton.interactable = false;
+            
             return;
         }
 
