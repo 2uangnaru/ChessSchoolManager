@@ -111,6 +111,8 @@ public class PlayerListController : MonoBehaviour
 
         currentPage = 1;
         RefreshFromCurrentTournament();
+        FindFirstObjectByType<MainMenuController>()
+    ?.RefreshLeftMenuButtons();
 
         Debug.Log("IMPORT DONE");
     }
