@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 
 public class OpenTournamentController : MonoBehaviour
 {
@@ -9,6 +11,12 @@ public class OpenTournamentController : MonoBehaviour
     [SerializeField] private MainMenuController mainMenuController;
     [SerializeField] private PlayerListController playerListController;
     [SerializeField] private Button openSelectedButton;
+    [SerializeField] private Button previousPageButton;
+    [SerializeField] private Button nextPageButton;
+    [SerializeField] private TMP_Text pageInfoText;
+
+    private int currentPage = 1;
+    private const int pageSize = 10;
     private SavedTournamentRowItem selectedRow;
     private string selectedTournament;
 
@@ -27,18 +35,65 @@ public class OpenTournamentController : MonoBehaviour
         List<string> tournaments =
             SaveLoadManager.GetTournamentNames();
 
-        foreach (string tournamentName in tournaments)
+        int totalItems = tournaments.Count;
+        int totalPages = GetTotalPages(totalItems);
+
+        currentPage = Mathf.Clamp(currentPage, 1, totalPages);
+
+        int startIndex = (currentPage - 1) * pageSize;
+        int endIndex = Mathf.Min(startIndex + pageSize, totalItems);
+
+        for (int i = startIndex; i < endIndex; i++)
         {
+            string tournamentName = tournaments[i];
+
             SavedTournamentRowItem row =
                 Instantiate(rowPrefab, contentRoot);
 
             row.Setup(tournamentName, OnTournamentSelected);
         }
 
+        UpdatePaginationUI(totalItems);
+
         selectedTournament = null;
         selectedRow = null;
 
         openSelectedButton.interactable = false;
+    }
+
+
+    public void PreviousPage()
+    {
+        if (currentPage <= 1)
+            return;
+
+        currentPage--;
+        RefreshList();
+    }
+
+    public void NextPage()
+    {
+        currentPage++;
+        RefreshList();
+    }
+
+    private int GetTotalPages(int totalItems)
+    {
+        if (totalItems <= 0)
+            return 1;
+
+        return Mathf.CeilToInt(totalItems / (float)pageSize);
+    }
+
+    private void UpdatePaginationUI(int totalItems)
+    {
+        int totalPages = GetTotalPages(totalItems);
+
+        currentPage = Mathf.Clamp(currentPage, 1, totalPages);
+
+        pageInfoText.text = $"Trang {currentPage} / {totalPages}";
+        previousPageButton.interactable = currentPage > 1;
+        nextPageButton.interactable = currentPage < totalPages;
     }
 
     public void DeleteSelectedTournament()
