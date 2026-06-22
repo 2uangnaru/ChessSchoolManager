@@ -284,11 +284,19 @@ public class ResultController : MonoBehaviour
                     black.Score += 1f;
                     UpdateElo(white, black, 0f, 1f);
                     break;
+
             }
+
+            if (!white.OpponentIds.Contains(black.Id))
+                white.OpponentIds.Add(black.Id);
+
+            if (!black.OpponentIds.Contains(white.Id))
+                black.OpponentIds.Add(white.Id);
+
         }
 
 
-
+        CalculateBuchholz(tournament);
         round.IsFinished = true;
         tournament.CurrentRound++;
 
@@ -299,6 +307,26 @@ public class ResultController : MonoBehaviour
         Debug.Log($"Đã chốt ván {round.RoundNumber}. Sang ván {tournament.CurrentRound + 1}");
     }
 
+
+    private void CalculateBuchholz(TournamentData tournament)
+    {
+        foreach (PlayerData player in tournament.Players)
+        {
+            float buchholz = 0;
+
+            foreach (int opponentId in player.OpponentIds)
+            {
+                PlayerData opponent =
+                    tournament.Players.Find(
+                        p => p.Id == opponentId);
+
+                if (opponent != null)
+                    buchholz += opponent.Score;
+            }
+
+            player.Buchholz = buchholz;
+        }
+    }
 
     private void UpdateElo(PlayerData white, PlayerData black, float whiteResult, float blackResult)
     {

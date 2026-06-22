@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Generic;
 
 [Serializable]
 public class PlayerData
@@ -16,4 +18,6 @@ public class PlayerData
 
     public int InitialElo = 1000;
     public int CurrentElo = 1000;
+    public float Buchholz;
+    public List<int> OpponentIds = new();
 }

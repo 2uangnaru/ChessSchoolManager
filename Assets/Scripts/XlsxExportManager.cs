@@ -149,17 +149,82 @@ public static class XlsxExportManager
 </Relationships>";
     }
 
+    private static string GetStylesXml()
+    {
+        return @"<?xml version=""1.0"" encoding=""UTF-8""?>
+<styleSheet xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"">
+    <fonts count=""2"">
+        <font>
+            <sz val=""11""/>
+            <name val=""Calibri""/>
+        </font>
+        <font>
+            <b/>
+            <sz val=""12""/>
+            <name val=""Calibri""/>
+        </font>
+    </fonts>
+
+    <fills count=""2"">
+        <fill>
+            <patternFill patternType=""none""/>
+        </fill>
+        <fill>
+            <patternFill patternType=""gray125""/>
+        </fill>
+    </fills>
+
+    <borders count=""2"">
+        <border>
+            <left/><right/><top/><bottom/><diagonal/>
+        </border>
+        <border>
+            <left style=""thin""><color auto=""1""/></left>
+            <right style=""thin""><color auto=""1""/></right>
+            <top style=""thin""><color auto=""1""/></top>
+            <bottom style=""thin""><color auto=""1""/></bottom>
+            <diagonal/>
+        </border>
+    </borders>
+
+    <cellStyleXfs count=""1"">
+        <xf numFmtId=""0"" fontId=""0"" fillId=""0"" borderId=""0""/>
+    </cellStyleXfs>
+
+    <cellXfs count=""3"">
+        <xf numFmtId=""0"" fontId=""0"" fillId=""0"" borderId=""0"" xfId=""0""/>
+        <xf numFmtId=""0"" fontId=""1"" fillId=""0"" borderId=""1"" xfId=""0"" applyFont=""1"" applyBorder=""1""/>
+        <xf numFmtId=""0"" fontId=""0"" fillId=""0"" borderId=""1"" xfId=""0"" applyBorder=""1""/>
+    </cellXfs>
+</styleSheet>";
+    }
+
     private static string GetSheetXml(List<List<string>> rows)
     {
         StringBuilder sb = new StringBuilder();
 
         sb.Append(@"<?xml version=""1.0"" encoding=""UTF-8""?>
-<worksheet xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"">
-<sheetData>");
+<worksheet xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"">");
+
+        sb.Append(@"
+<cols>
+    <col min=""1"" max=""1"" width=""10"" customWidth=""1""/>
+    <col min=""2"" max=""2"" width=""28"" customWidth=""1""/>
+    <col min=""3"" max=""3"" width=""28"" customWidth=""1""/>
+    <col min=""4"" max=""4"" width=""18"" customWidth=""1""/>
+    <col min=""5"" max=""5"" width=""15"" customWidth=""1""/>
+    <col min=""6"" max=""6"" width=""15"" customWidth=""1""/>
+</cols>");
+
+        sb.Append("<sheetData>");
 
         for (int r = 0; r < rows.Count; r++)
         {
             int rowIndex = r + 1;
+
+            bool isTitleRow = r == 0 || r == 1;
+            bool isHeaderRow = r == 3;
+
             sb.Append($"<row r=\"{rowIndex}\">");
 
             for (int c = 0; c < rows[r].Count; c++)
@@ -167,13 +232,26 @@ public static class XlsxExportManager
                 string cellRef = $"{GetColumnName(c)}{rowIndex}";
                 string value = EscapeXml(rows[r][c]);
 
-                sb.Append($"<c r=\"{cellRef}\" t=\"inlineStr\"><is><t>{value}</t></is></c>");
+                int styleIndex = isHeaderRow ? 1 : 2;
+
+                if (isTitleRow)
+                    styleIndex = 1;
+
+                sb.Append(
+                    $"<c r=\"{cellRef}\" t=\"inlineStr\"><is><t>{value}</t></is></c>"
+                );
             }
 
             sb.Append("</row>");
         }
 
-        sb.Append("</sheetData></worksheet>");
+        sb.Append("</sheetData>");
+
+        sb.Append(@"
+<pageMargins left=""0.3"" right=""0.3"" top=""0.5"" bottom=""0.5"" header=""0.3"" footer=""0.3""/>
+<pageSetup orientation=""landscape"" paperSize=""9"" fitToWidth=""1"" fitToHeight=""0""/>
+<printOptions horizontalCentered=""1""/>
+</worksheet>");
 
         return sb.ToString();
     }
@@ -219,6 +297,7 @@ public static class XlsxExportManager
 
         List<PlayerData> sortedPlayers = tournament.Players
             .OrderByDescending(p => p.Score)
+            .ThenByDescending(p => p.Buchholz)
             .ThenByDescending(p => p.CurrentElo)
             .ThenBy(p => p.Name)
             .ToList();
@@ -228,7 +307,7 @@ public static class XlsxExportManager
         rows.Add(new List<string> { tournament.TournamentName });
         rows.Add(new List<string> { $"Bảng xếp hạng sau ván {tournament.CurrentRound} / {tournament.TotalRounds}" });
         rows.Add(new List<string>());
-        rows.Add(new List<string> { "Hạng", "Họ tên", "Lớp", "Điểm", "Elo" });
+        rows.Add(new List<string> { "Hạng", "Họ tên", "Lớp", "Điểm", "Điểm phụ", "Elo" });
 
         for (int i = 0; i < sortedPlayers.Count; i++)
         {
@@ -240,6 +319,7 @@ public static class XlsxExportManager
             player.Name,
             player.ClassName,
             player.Score.ToString("0.0"),
+            player.Buchholz.ToString("0.0"),
             player.CurrentElo.ToString()
         });
         }

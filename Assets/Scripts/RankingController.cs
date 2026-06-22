@@ -82,9 +82,10 @@ public class RankingController : MonoBehaviour
 
         List<PlayerData> sortedPlayers = tournament.Players
             .OrderByDescending(p => p.Score)
+            .ThenByDescending(p => p.Buchholz)
+            .ThenByDescending(p => p.CurrentElo)
             .ThenByDescending(p => CalculateBuchholz(p, tournament))
             .ThenByDescending(p => CalculateWinCount(p, tournament))
-            .ThenByDescending(p => p.CurrentElo)
             .ThenBy(p => p.Name)
             .ToList();
 
