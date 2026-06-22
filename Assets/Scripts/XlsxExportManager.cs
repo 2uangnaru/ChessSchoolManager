@@ -209,11 +209,11 @@ public static class XlsxExportManager
         sb.Append(@"
 <cols>
     <col min=""1"" max=""1"" width=""10"" customWidth=""1""/>
-    <col min=""2"" max=""2"" width=""30"" customWidth=""1""/>
-    <col min=""3"" max=""3"" width=""30"" customWidth=""1""/>
-    <col min=""4"" max=""4"" width=""18"" customWidth=""1""/>
-    <col min=""5"" max=""5"" width=""18"" customWidth=""1""/>
-    <col min=""6"" max=""6"" width=""18"" customWidth=""1""/>
+    <col min=""2"" max=""2"" width=""35"" customWidth=""1""/>
+    <col min=""3"" max=""3"" width=""20"" customWidth=""1""/>
+    <col min=""4"" max=""4"" width=""20"" customWidth=""1""/>
+    <col min=""5"" max=""5"" width=""20"" customWidth=""1""/>
+    <col min=""6"" max=""6"" width=""20"" customWidth=""1""/>
 </cols>");
 
         sb.Append("<sheetData>");
