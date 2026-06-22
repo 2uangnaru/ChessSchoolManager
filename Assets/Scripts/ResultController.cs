@@ -271,6 +271,7 @@ public class ResultController : MonoBehaviour
             {
                 case MatchResult.WhiteWin:
                     white.Score += 1f;
+                    white.Wins++;
                     UpdateElo(white, black, 1f, 0f);
                     break;
 
@@ -282,6 +283,7 @@ public class ResultController : MonoBehaviour
 
                 case MatchResult.BlackWin:
                     black.Score += 1f;
+                    black.Wins++;
                     UpdateElo(white, black, 0f, 1f);
                     break;
 

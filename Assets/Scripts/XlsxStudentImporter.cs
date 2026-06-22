@@ -68,6 +68,11 @@ public static class XlsxStudentImporter
                 Name = studentName,
                 ClassName = className,
                 Score = 0,
+                Buchholz = 0,
+                Wins = 0,
+                WhiteCount = 0,
+                BlackCount = 0,
+                HadBye = false,
                 InitialElo = 1000,
                 CurrentElo = 1000
             });

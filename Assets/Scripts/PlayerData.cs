@@ -15,7 +15,7 @@ public class PlayerData
     public int BlackCount;
 
     public bool HadBye;
-
+    public int Wins;
     public int InitialElo = 1000;
     public int CurrentElo = 1000;
     public float Buchholz;
