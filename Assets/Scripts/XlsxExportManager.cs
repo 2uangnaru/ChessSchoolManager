@@ -203,17 +203,17 @@ public static class XlsxExportManager
     {
         StringBuilder sb = new StringBuilder();
 
-        sb.Append(@"<?xml version=""1.0"" encoding=""UTF-8""?>
+        sb.Append(@"<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>
 <worksheet xmlns=""http://schemas.openxmlformats.org/spreadsheetml/2006/main"">");
 
         sb.Append(@"
 <cols>
     <col min=""1"" max=""1"" width=""10"" customWidth=""1""/>
-    <col min=""2"" max=""2"" width=""28"" customWidth=""1""/>
-    <col min=""3"" max=""3"" width=""28"" customWidth=""1""/>
+    <col min=""2"" max=""2"" width=""30"" customWidth=""1""/>
+    <col min=""3"" max=""3"" width=""30"" customWidth=""1""/>
     <col min=""4"" max=""4"" width=""18"" customWidth=""1""/>
-    <col min=""5"" max=""5"" width=""15"" customWidth=""1""/>
-    <col min=""6"" max=""6"" width=""15"" customWidth=""1""/>
+    <col min=""5"" max=""5"" width=""18"" customWidth=""1""/>
+    <col min=""6"" max=""6"" width=""18"" customWidth=""1""/>
 </cols>");
 
         sb.Append("<sheetData>");
@@ -221,21 +221,12 @@ public static class XlsxExportManager
         for (int r = 0; r < rows.Count; r++)
         {
             int rowIndex = r + 1;
-
-            bool isTitleRow = r == 0 || r == 1;
-            bool isHeaderRow = r == 3;
-
             sb.Append($"<row r=\"{rowIndex}\">");
 
             for (int c = 0; c < rows[r].Count; c++)
             {
                 string cellRef = $"{GetColumnName(c)}{rowIndex}";
-                string value = EscapeXml(rows[r][c]);
-
-                int styleIndex = isHeaderRow ? 1 : 2;
-
-                if (isTitleRow)
-                    styleIndex = 1;
+                string value = EscapeXml(RemoveInvalidXmlChars(rows[r][c]));
 
                 sb.Append(
                     $"<c r=\"{cellRef}\" t=\"inlineStr\"><is><t>{value}</t></is></c>"
@@ -246,12 +237,7 @@ public static class XlsxExportManager
         }
 
         sb.Append("</sheetData>");
-
-        sb.Append(@"
-<pageMargins left=""0.3"" right=""0.3"" top=""0.5"" bottom=""0.5"" header=""0.3"" footer=""0.3""/>
-<pageSetup orientation=""landscape"" paperSize=""9"" fitToWidth=""1"" fitToHeight=""0""/>
-<printOptions horizontalCentered=""1""/>
-</worksheet>");
+        sb.Append("</worksheet>");
 
         return sb.ToString();
     }
@@ -284,6 +270,29 @@ public static class XlsxExportManager
             .Replace("'", "&apos;");
     }
 
+    private static string RemoveInvalidXmlChars(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return "";
+
+        StringBuilder sb = new StringBuilder();
+
+        foreach (char c in text)
+        {
+            if (
+                c == 0x9 ||
+                c == 0xA ||
+                c == 0xD ||
+                (c >= 0x20 && c <= 0xD7FF) ||
+                (c >= 0xE000 && c <= 0xFFFD)
+            )
+            {
+                sb.Append(c);
+            }
+        }
+
+        return sb.ToString();
+    }
 
     public static void ExportRanking()
     {
