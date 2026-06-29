@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 public class PairingController : MonoBehaviour
 {
     [Header("Texts")]
@@ -17,6 +18,12 @@ public class PairingController : MonoBehaviour
     [SerializeField] private Button previousPageButton;
     [SerializeField] private Button nextPageButton;
     [SerializeField] private TMP_Text pageInfoText;
+    [SerializeField] private Button gotoResultButton;
+
+    [SerializeField] private TMP_Text gotoResultButtonText;
+    [SerializeField] private MainMenuController mainMenuController;
+
+    [SerializeField] private Button exportPairingButton;
 
     private int currentPage = 1;
     private const int pageSize = 6;
@@ -40,6 +47,66 @@ public class PairingController : MonoBehaviour
         RefreshPairingTable();
     }
 
+
+    private void UpdateExportButtonState()
+    {
+        TournamentData tournament =
+            TournamentManager.Instance.CurrentTournament;
+
+        bool canExport =
+            tournament != null &&
+            tournament.Rounds.Count > 0;
+
+        exportPairingButton.interactable = canExport;
+    }
+    private void UpdateResultButtonState()
+    {
+        TournamentData tournament = TournamentManager.Instance.CurrentTournament;
+
+        if (tournament == null)
+        {
+            gotoResultButton.interactable = false;
+            gotoResultButtonText.text = "CHUYỂN SANG NHẬP KẾT QUẢ";
+            return;
+        }
+
+        bool tournamentFinished =
+            tournament.CurrentRound >= tournament.TotalRounds;
+
+        if (tournamentFinished)
+        {
+            gotoResultButton.interactable = true;
+            gotoResultButtonText.text = "XEM BẢNG XẾP HẠNG";
+            return;
+        }
+
+        int roundNumber = tournament.CurrentRound + 1;
+
+        bool hasPairing =
+            tournament.Rounds.Exists(r => r.RoundNumber == roundNumber);
+
+        gotoResultButton.interactable = hasPairing;
+        gotoResultButtonText.text = "CHUYỂN SANG NHẬP KẾT QUẢ";
+    }
+
+    public void OnGotoResultOrRankingClicked()
+    {
+        TournamentData tournament = TournamentManager.Instance.CurrentTournament;
+
+        if (tournament == null)
+            return;
+
+        if (tournament.CurrentRound >= tournament.TotalRounds)
+        {
+            mainMenuController.ShowRanking();
+        }
+        else
+        {
+            mainMenuController.ShowResult();
+        }
+    }
+
+
     private int GetTotalPages(int totalItems)
     {
         if (totalItems <= 0) return 1;
@@ -61,17 +128,20 @@ public class PairingController : MonoBehaviour
     {
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
 
-        int nextRound = tournament.CurrentRound + 1;
-
         if (tournament == null)
         {
             roundTitleText.text = "CHƯA CÓ GIẢI ĐẤU";
             totalPlayersText.text = "Tổng học sinh: 0";
             totalBoardsText.text = "Số bàn: 0";
             generatePairingButton.interactable = false;
+
             UpdatePaginationUI(0);
+            UpdateResultButtonState();
+            UpdateExportButtonState();
             return;
         }
+
+        int nextRound = tournament.CurrentRound + 1;
 
         if (tournament.CurrentRound >= tournament.TotalRounds)
         {
@@ -80,19 +150,36 @@ public class PairingController : MonoBehaviour
             totalBoardsText.text = "Số bàn: 0";
 
             generatePairingButton.interactable = false;
+            UpdateResultButtonState();
+            UpdateExportButtonState();
             return;
         }
 
-        bool alreadyPaired = tournament.Rounds.Exists(
-        r => r.RoundNumber == nextRound);
+        bool alreadyPaired =
+            tournament.Rounds.Exists(r => r.RoundNumber == nextRound);
 
-        generatePairingButton.interactable = !alreadyPaired;
+        bool enoughPlayers =
+            tournament.Players.Count >= 2;
+
+        bool tournamentFinished =
+            tournament.CurrentRound >= tournament.TotalRounds;
+
+        generatePairingButton.interactable =
+            enoughPlayers &&
+            !alreadyPaired &&
+            !tournamentFinished;
         int totalPlayers = tournament.Players.Count;
         int totalBoards = totalPlayers / 2;
 
         roundTitleText.text = $"BỐC THĂM VÁN: {nextRound} / {tournament.TotalRounds}";
         totalPlayersText.text = $"Tổng học sinh: {totalPlayers}";
         totalBoardsText.text = $"Số bàn: {totalBoards}";
+
+        UpdateExportButtonState();
+
+        UpdateResultButtonState();
+
+
     }
 
     public void GeneratePairing()
@@ -130,6 +217,9 @@ public class PairingController : MonoBehaviour
         RoundData round = GenerateSwissRound(tournament, roundNumber);
 
         tournament.Rounds.Add(round);
+        UpdateExportButtonState();
+
+        UpdateResultButtonState();
 
         SaveLoadManager.SaveTournament(tournament);
 
@@ -137,12 +227,15 @@ public class PairingController : MonoBehaviour
         RefreshPairingTable();
 
         Debug.Log($"Đã tạo bốc thăm ván {roundNumber}");
+
+
     }
 
     public void RefreshPairingPanel()
     {
         RefreshInfo();
         RefreshPairingTable();
+        UpdateResultButtonState();
     }
     private void RefreshPairingTable()
     {

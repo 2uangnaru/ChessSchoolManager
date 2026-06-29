@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+using UnityEngine.UI;
 public class MainMenuController : MonoBehaviour
 {
     [Header("Panels")]
@@ -14,12 +14,16 @@ public class MainMenuController : MonoBehaviour
     [SerializeField] private PairingController pairingController;
     [SerializeField] private ResultController resultController;
     [SerializeField] private RankingController rankingController;
-
+    [SerializeField] private Button pairingMenuButton;
+    [SerializeField] private Button rankingMenuButton;
 
 
     private void Start()
     {
+        TournamentManager.Instance.CurrentTournament = null;
         ShowCreateTournament();
+        ShowCreateTournament();
+        RefreshLeftMenuButtons();
     }
 
     public void ShowCreateTournament()
@@ -55,7 +59,27 @@ public class MainMenuController : MonoBehaviour
         ShowOnly(importTournamentPanel);
     }
 
+    public void RefreshLeftMenuButtons()
+    {
+        TournamentData tournament =
+            TournamentManager.Instance.CurrentTournament;
 
+        bool hasTournament =
+            tournament != null;
+
+        bool canOpenPairing =
+            hasTournament &&
+            tournament.Players.Count >= 2;
+
+        pairingMenuButton.interactable =
+            canOpenPairing;
+
+        bool canOpenRanking =
+            hasTournament &&
+            tournament.Players.Count > 0;
+
+        rankingMenuButton.interactable = canOpenRanking;
+    }
     private void ShowOnly(GameObject targetPanel)
     {
         createTournamentPanel.SetActive(targetPanel == createTournamentPanel);

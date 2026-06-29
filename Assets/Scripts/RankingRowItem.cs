@@ -8,7 +8,7 @@ public class RankingRowItem : MonoBehaviour
     [SerializeField] private TMP_Text classText;
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private TMP_Text eloText;
-
+    [SerializeField] private TMP_Text buchholzText;
     public void Setup(int rank, PlayerData player)
     {
         rankText.text = rank.ToString();
@@ -16,5 +16,6 @@ public class RankingRowItem : MonoBehaviour
         classText.text = player.ClassName;
         scoreText.text = player.Score.ToString("0.0");
         eloText.text = player.CurrentElo.ToString();
+        buchholzText.text =player.Buchholz.ToString("0.0");
     }
 }

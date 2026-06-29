@@ -12,7 +12,10 @@ public class ResultController : MonoBehaviour
     [SerializeField] private Button previousPageButton;
     [SerializeField] private Button nextPageButton;
     [SerializeField] private TMP_Text pageInfoText;
-
+    [SerializeField] private Button whiteWinButton;
+    [SerializeField] private Button drawButton;
+    [SerializeField] private Button blackWinButton;
+    [SerializeField] private Button clearResultButton;
     private int currentPage = 1;
     private const int pageSize = 6;
 
@@ -57,6 +60,7 @@ public class ResultController : MonoBehaviour
     {
         selectedRow = null;
         selectedMatch = null;
+        UpdateResultButtonsState();
 
         foreach (Transform child in resultRowsContent)
         {
@@ -119,6 +123,16 @@ public class ResultController : MonoBehaviour
         UpdateFinishButtonState();
     }
 
+    private void UpdateResultButtonsState()
+    {
+        bool hasSelection = selectedMatch != null;
+
+        whiteWinButton.interactable = hasSelection;
+        drawButton.interactable = hasSelection;
+        blackWinButton.interactable = hasSelection;
+        clearResultButton.interactable = hasSelection;
+    }
+
     private void UpdateFinishButtonState()
     {
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
@@ -157,6 +171,7 @@ public class ResultController : MonoBehaviour
         selectedMatch = match;
 
         selectedRow.SetSelected(true);
+        UpdateResultButtonsState();
     }
 
     public void SetWhiteWin()
@@ -181,15 +196,25 @@ public class ResultController : MonoBehaviour
 
     private void SetResult(MatchResult result)
     {
-        if (selectedMatch == null)
+        if (selectedMatch == null || selectedRow == null)
         {
             Debug.LogWarning("Chưa chọn bàn đấu.");
             return;
         }
 
         selectedMatch.Result = result;
+
+        // QUAN TRỌNG
         selectedRow.RefreshResultText();
+
         UpdateFinishButtonState();
+
+        selectedRow.SetSelected(false);
+
+        selectedRow = null;
+        selectedMatch = null;
+
+        UpdateResultButtonsState();
 
         SaveLoadManager.SaveTournament(
             TournamentManager.Instance.CurrentTournament
@@ -246,6 +271,7 @@ public class ResultController : MonoBehaviour
             {
                 case MatchResult.WhiteWin:
                     white.Score += 1f;
+                    white.Wins++;
                     UpdateElo(white, black, 1f, 0f);
                     break;
 
@@ -257,13 +283,22 @@ public class ResultController : MonoBehaviour
 
                 case MatchResult.BlackWin:
                     black.Score += 1f;
+                    black.Wins++;
                     UpdateElo(white, black, 0f, 1f);
                     break;
+
             }
+
+            if (!white.OpponentIds.Contains(black.Id))
+                white.OpponentIds.Add(black.Id);
+
+            if (!black.OpponentIds.Contains(white.Id))
+                black.OpponentIds.Add(white.Id);
+
         }
 
 
-
+        CalculateBuchholz(tournament);
         round.IsFinished = true;
         tournament.CurrentRound++;
 
@@ -274,6 +309,26 @@ public class ResultController : MonoBehaviour
         Debug.Log($"Đã chốt ván {round.RoundNumber}. Sang ván {tournament.CurrentRound + 1}");
     }
 
+
+    private void CalculateBuchholz(TournamentData tournament)
+    {
+        foreach (PlayerData player in tournament.Players)
+        {
+            float buchholz = 0;
+
+            foreach (int opponentId in player.OpponentIds)
+            {
+                PlayerData opponent =
+                    tournament.Players.Find(
+                        p => p.Id == opponentId);
+
+                if (opponent != null)
+                    buchholz += opponent.Score;
+            }
+
+            player.Buchholz = buchholz;
+        }
+    }
 
     private void UpdateElo(PlayerData white, PlayerData black, float whiteResult, float blackResult)
     {

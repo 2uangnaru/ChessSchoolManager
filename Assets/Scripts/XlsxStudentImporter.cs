@@ -68,6 +68,11 @@ public static class XlsxStudentImporter
                 Name = studentName,
                 ClassName = className,
                 Score = 0,
+                Buchholz = 0,
+                Wins = 0,
+                WhiteCount = 0,
+                BlackCount = 0,
+                HadBye = false,
                 InitialElo = 1000,
                 CurrentElo = 1000
             });
@@ -138,6 +143,13 @@ public static class XlsxStudentImporter
                         if (sharedIndex >= 0 && sharedIndex < sharedStrings.Count)
                             value = sharedStrings[sharedIndex];
                     }
+                }
+                else if (cellType == "inlineStr")
+                {
+                    XmlNode textNode = cellNode.SelectSingleNode(".//*[local-name()='t']");
+
+                    if (textNode != null)
+                        value = textNode.InnerText;
                 }
 
                 row[colName] = value;

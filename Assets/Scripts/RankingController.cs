@@ -12,6 +12,7 @@ public class RankingController : MonoBehaviour
     [SerializeField] private Button previousPageButton;
     [SerializeField] private Button nextPageButton;
     [SerializeField] private TMP_Text pageInfoText;
+    [SerializeField] private Button exportRankingButton;
 
     private int currentPage = 1;
     private const int pageSize = 9;
@@ -59,10 +60,20 @@ public class RankingController : MonoBehaviour
 
         TournamentData tournament = TournamentManager.Instance.CurrentTournament;
 
+        if (exportRankingButton != null)
+        {
+            exportRankingButton.interactable =
+                tournament != null &&
+                tournament.Rounds.Count > 0;
+        }
+
         if (tournament == null)
         {
             rankingTitleText.text = "CHƯA CÓ GIẢI ĐẤU";
             UpdatePaginationUI(0);
+            if (exportRankingButton != null)
+                exportRankingButton.interactable = false;
+            
             return;
         }
 
@@ -71,8 +82,8 @@ public class RankingController : MonoBehaviour
 
         List<PlayerData> sortedPlayers = tournament.Players
             .OrderByDescending(p => p.Score)
-            .ThenByDescending(p => CalculateBuchholz(p, tournament))
-            .ThenByDescending(p => CalculateWinCount(p, tournament))
+            .ThenByDescending(p => p.Buchholz)
+            .ThenByDescending(p => p.Wins)
             .ThenByDescending(p => p.CurrentElo)
             .ThenBy(p => p.Name)
             .ToList();
@@ -96,57 +107,57 @@ public class RankingController : MonoBehaviour
         UpdatePaginationUI(totalItems);
     }
 
-    private float CalculateBuchholz(PlayerData player, TournamentData tournament)
-    {
-        float total = 0f;
+    //private float CalculateBuchholz(PlayerData player, TournamentData tournament)
+    //{
+    //    float total = 0f;
 
-        foreach (RoundData round in tournament.Rounds)
-        {
-            foreach (MatchData match in round.Matches)
-            {
-                int opponentId = -1;
+    //    foreach (RoundData round in tournament.Rounds)
+    //    {
+    //        foreach (MatchData match in round.Matches)
+    //        {
+    //            int opponentId = -1;
 
-                if (match.WhitePlayerId == player.Id)
-                    opponentId = match.BlackPlayerId;
-                else if (match.BlackPlayerId == player.Id)
-                    opponentId = match.WhitePlayerId;
+    //            if (match.WhitePlayerId == player.Id)
+    //                opponentId = match.BlackPlayerId;
+    //            else if (match.BlackPlayerId == player.Id)
+    //                opponentId = match.WhitePlayerId;
 
-                if (opponentId == -1)
-                    continue;
+    //            if (opponentId == -1)
+    //                continue;
 
-                PlayerData opponent = tournament.Players.Find(p => p.Id == opponentId);
+    //            PlayerData opponent = tournament.Players.Find(p => p.Id == opponentId);
 
-                if (opponent != null)
-                    total += opponent.Score;
-            }
-        }
+    //            if (opponent != null)
+    //                total += opponent.Score;
+    //        }
+    //    }
 
-        return total;
-    }
+    //    return total;
+    //}
 
-    private int CalculateWinCount(PlayerData player, TournamentData tournament)
-    {
-        int wins = 0;
+    //private int CalculateWinCount(PlayerData player, TournamentData tournament)
+    //{
+    //    int wins = 0;
 
-        foreach (RoundData round in tournament.Rounds)
-        {
-            foreach (MatchData match in round.Matches)
-            {
-                if (match.WhitePlayerId == player.Id &&
-                    match.Result == MatchResult.WhiteWin)
-                {
-                    wins++;
-                }
+    //    foreach (RoundData round in tournament.Rounds)
+    //    {
+    //        foreach (MatchData match in round.Matches)
+    //        {
+    //            if (match.WhitePlayerId == player.Id &&
+    //                match.Result == MatchResult.WhiteWin)
+    //            {
+    //                wins++;
+    //            }
 
-                if (match.BlackPlayerId == player.Id &&
-                    match.Result == MatchResult.BlackWin)
-                {
-                    wins++;
-                }
-            }
-        }
+    //            if (match.BlackPlayerId == player.Id &&
+    //                match.Result == MatchResult.BlackWin)
+    //            {
+    //                wins++;
+    //            }
+    //        }
+    //    }
 
-        return wins;
-    }
+    //    return wins;
+    //}
 
 }

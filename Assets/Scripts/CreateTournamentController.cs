@@ -1,11 +1,12 @@
 ﻿using TMPro;
 using UnityEngine;
-
+using UnityEngine.UI;
 public class CreateTournamentController : MonoBehaviour
 {
     [SerializeField] private TMP_InputField tournamentNameInput;
     [SerializeField] private TMP_Dropdown roundDropdown;
     [SerializeField] private MainMenuController mainMenuController;
+    [SerializeField] private Button createTournamentButton;
 
     public void CreateTournament()
     {
@@ -33,6 +34,8 @@ public class CreateTournamentController : MonoBehaviour
 
         TournamentManager.Instance.CurrentTournament = data;
 
+        mainMenuController.RefreshLeftMenuButtons();
+
         SaveLoadManager.SaveTournament(data);
 
         mainMenuController.ResetAllRuntimePanels();
@@ -42,5 +45,22 @@ public class CreateTournamentController : MonoBehaviour
         mainMenuController.ShowPlayerList();
 
         Debug.Log($"Đã tạo giải mới: {data.TournamentName} | Số ván: {data.TotalRounds}");
+
+        mainMenuController.RefreshLeftMenuButtons();
     }
+
+    private void Start()
+    {
+        createTournamentButton.interactable = false;
+        tournamentNameInput.onValueChanged.AddListener(OnNameChanged);
+    }
+
+    private void OnNameChanged(string value)
+    {
+        createTournamentButton.interactable =
+            !string.IsNullOrWhiteSpace(value);
+    }
+
+
+
 }

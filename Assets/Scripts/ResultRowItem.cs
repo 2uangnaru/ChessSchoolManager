@@ -61,6 +61,7 @@ public class ResultRowItem : MonoBehaviour
             MatchResult.WhiteWin => "1 - 0",
             MatchResult.Draw => "1/2 - 1/2",
             MatchResult.BlackWin => "0 - 1",
+            MatchResult.Bye => "Miễn đấu",
             _ => "Chưa nhập"
         };
     }

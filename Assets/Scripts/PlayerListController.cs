@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
+using SFB;
 public class PlayerListController : MonoBehaviour
 {
     [Header("Inputs")]
@@ -65,6 +66,8 @@ public class PlayerListController : MonoBehaviour
             Name = playerName,
             ClassName = className,
             Score = 0,
+            Buchholz = 0,
+            Wins = 0,
             WhiteCount = 0,
             BlackCount = 0,
             HadBye = false,
@@ -73,6 +76,11 @@ public class PlayerListController : MonoBehaviour
         };
 
         tournament.Players.Add(player);
+
+
+
+        FindFirstObjectByType<MainMenuController>()
+    ?.RefreshLeftMenuButtons();
 
         nameInput.text = "";
         classInput.text = "";
@@ -83,12 +91,32 @@ public class PlayerListController : MonoBehaviour
 
     public void ImportExcel()
     {
-        string filePath = Path.Combine(Application.dataPath, "students.xlsx");
+        Debug.Log("IMPORT CLICK");
+
+        var paths = StandaloneFileBrowser.OpenFilePanel(
+            "Chọn file Excel",
+            "",
+            "xlsx",
+            false
+        );
+
+        Debug.Log($"Selected count: {paths.Length}");
+
+        if (paths.Length == 0)
+            return;
+
+        string filePath = paths[0];
+
+        Debug.Log($"Selected file: {filePath}");
 
         XlsxStudentImporter.ImportFromXlsx(filePath);
 
         currentPage = 1;
         RefreshFromCurrentTournament();
+        FindFirstObjectByType<MainMenuController>()
+    ?.RefreshLeftMenuButtons();
+
+        Debug.Log("IMPORT DONE");
     }
 
     private int GetNextPlayerId(List<PlayerData> players)
@@ -118,6 +146,9 @@ public class PlayerListController : MonoBehaviour
             return;
 
         tournament.Players.Remove(player);
+
+        FindFirstObjectByType<MainMenuController>()
+            ?.RefreshLeftMenuButtons();
 
         RefreshFromCurrentTournament();
         SaveLoadManager.SaveTournament(tournament);
